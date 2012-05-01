@@ -1,0 +1,29 @@
+--- biosdevname-0.3.8/biosdevname.rules.in.off	2011-07-25 14:08:46.000000000 +0200
++++ biosdevname-0.3.8/biosdevname.rules.in	2011-07-25 14:10:55.000000000 +0200
+@@ -3,6 +3,9 @@
+ ACTION!="add",    GOTO="netdevicename_end"
+ NAME=="?*",       GOTO="netdevicename_end"
+ 
++# whitelist all Dell systems
++ATTR{[dmi/id]sys_vendor}=="Dell*", ENV{UDEV_BIOSDEVNAME}="1"
++
+ # kernel command line "biosdevname={0|1}" can turn off/on biosdevname
+ IMPORT{cmdline}="biosdevname"
+ ENV{biosdevname}=="?*", ENV{UDEV_BIOSDEVNAME}="$env{biosdevname}"
+@@ -11,13 +14,13 @@
+ ENV{UDEV_BIOSDEVNAME}=="0", GOTO="netdevicename_end"
+ ENV{UDEV_BIOSDEVNAME}=="1", GOTO="netdevicename_start"
+ 
+-# uncomment the next line for biosdevname to be off by default
+-# GOTO="netdevicename_end"
++# off by default
++GOTO="netdevicename_end"
+ 
+ LABEL="netdevicename_start"
+ 
+ # using NAME= instead of setting INTERFACE_NAME, so that persistent
+ # names aren't generated for these devices, they are "named" on each boot.
+-PROGRAM="/sbin/biosdevname --policy physical -i %k", NAME="%c",  OPTIONS+="string_escape=replace"
++PROGRAM="/sbin/biosdevname --smbios 2.6 --nopirq --policy physical -i %k", NAME="%c",  OPTIONS+="string_escape=replace"
+ 
+ LABEL="netdevicename_end"
